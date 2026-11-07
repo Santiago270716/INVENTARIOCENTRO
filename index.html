@@ -88,7 +88,7 @@ function startSubs(){
 }
 async function entrar(u,h,silent){
   let r;try{r=await S.db.raw('login',{nuevo:!silent},{u,h})}catch(e){if(!silent)msg(e.message==='Falta API_URL'?'Falta el enlace del servidor: usa "Configurar servidor" y pega la direcci\u00f3n /exec':'No hay respuesta v\u00e1lida del servidor. Revisa la implementaci\u00f3n de Google (acceso: Cualquier persona, nueva versi\u00f3n) y que la direcci\u00f3n termine en /exec');return false}
-  if(!r.ok){if(!silent)msg('Usuario o clave incorrectos');return false}
+  if(!r.ok){if(!silent)msg(r.error==='auth'?'Usuario o clave incorrectos':'El servidor respondi\u00f3 con un error: '+(r.error||'desconocido'));return false}
   S.ses={u,h};S.role=r.rol;S.admin=r.rol==='admin';
   try{localStorage.setItem('inv_ses',JSON.stringify(S.ses))}catch(e){}
   await S.db.start();startSubs();return true}
@@ -448,10 +448,10 @@ document.addEventListener('click',async e=>{
     try{if(u)localStorage.setItem('inv_api',u);else localStorage.removeItem('inv_api')}catch(x){return msg('No se pudo guardar en este navegador')}
     msg(u?'Servidor guardado':'Servidor borrado');setTimeout(()=>location.reload(),700)}
   else if(a==='probar'){if(!API_URL)return msg('Falta el enlace del servidor: usa "Configurar servidor" y pega la direcci\u00f3n /exec');
-    try{const r=await fetch(API_URL),t=await r.text();msg(t.includes('servicio activo')||t.includes('Inventario')?'El servidor responde correctamente':'Respondi\u00f3, pero no es el servicio de inventario: revisa que sea la implementaci\u00f3n correcta y el acceso Cualquier persona')}
+    try{const r=await fetch(API_URL),t=await r.text();msg(t.includes('servicio activo')||t.includes('Inventario')?'El servidor responde: '+t.slice(0,70):'Respondi\u00f3, pero no es el servicio de inventario: revisa que sea la implementaci\u00f3n correcta y el acceso Cualquier persona')}
     catch(e){msg('No se pudo contactar al servidor: revisa la direcci\u00f3n /exec y que el acceso sea Cualquier persona')}}
   else if(a==='limpiar'){S.fy=S.fm=S.fp=S.fq='';render(true)}
-  else if(a==='expmes'){await exportMes();msg('Archivo del mes descargado')}
+ee
   else if(a==='impmes'){$('#imf').click()}
   else if(a==='cerrarmes'){await cerrarMes()}
   else if(a==='abrirmes'){const mes=S.mm||S.fecha.slice(0,7);if(await yes('\u00bfReabrir el mes '+mes+'?')){await S.db.doc('cierres/'+mes).delete();log('Reabri\u00f3 el mes '+mes)}}
